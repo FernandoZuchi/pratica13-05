@@ -25,7 +25,7 @@ Antes de começar, você deve ter:
 ### 1. Criação do projeto com Vite
 
 ```bash
-npm create vite@latest todo-board --template react
+npm create vite@latest
 cd todo-board
 npm install
 ```
@@ -33,28 +33,35 @@ npm install
 ### Instalação e configuração do Tailwind CSS
 
 ```bash
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+npm install tailwindcss @tailwindcss/vite
 ```
 
-No arquivo tailwind.config.js, configure:
+No arquivo vite.config.js, configure:
 
 ```js
-content: ["./index.html", "./src/**/*.{js,jsx}"]
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss()  
+  ],
+})
+
 ```
 
-No arquivo src/styles.css:
+No arquivo src/App.css:
 
 ```css
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
 ```
 
 No index.html, adicione:
 
 ```html
-<link href="/src/styles.css" rel="stylesheet">
+<link href="/src/App.css" rel="stylesheet">
 ```
 
 ### Estrutura final do projeto
@@ -95,21 +102,27 @@ import { useState } from "react";
 import Board from "./components/Board";
 import Input from "./components/Input";
 
+// Componente principal da aplicação
 function App() {
-  const [taskList, setTaskList] = useState([]);
+  const [taskList, setTaskList] = useState([]); // Estado para armazenar a lista de tarefas
 
   return (
     <div className="flex flex-col items-center justify-center py-8 gap-4">
+      {/* Título do aplicativo */}
       <h1 className="text-xl font-semibold">🧾 - To Do Board</h1>
+      
+      {/* Componente de input para adicionar novas tarefas */}
       <Input taskList={taskList} setTaskList={setTaskList} />
+      
+      {/* Exibe as tarefas como uma lista de Boards */}
       <div className="flex flex-wrap justify-center gap-4">
         {taskList.map((task, index) => (
           <Board
-            key={index}
-            index={index}
-            task={task}
-            taskList={taskList}
-            setTaskList={setTaskList}
+            key={index} // Chave única para cada item
+            index={index} // Índice da tarefa atual
+            task={task} // Texto da tarefa
+            taskList={taskList} // Lista completa de tarefas
+            setTaskList={setTaskList} // Função para atualizar a lista
           />
         ))}
       </div>
@@ -126,24 +139,29 @@ Input.jsx - adiciona novas tarefas
 ```jsx
 import { useState } from "react";
 
+// Componente que contém o input e botão para adicionar novas tarefas
 const Input = ({ taskList, setTaskList }) => {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(""); // Estado para armazenar o valor atual do input
 
+  // Função que adiciona uma nova tarefa à lista
   const handleAddTask = (e) => {
-    e.preventDefault();
-    setTaskList([...taskList, input]);
-    setInput("");
+    e.preventDefault(); // Evita recarregamento da página
+    setTaskList([...taskList, input]); // Adiciona a nova tarefa à lista existente
+    setInput(""); // Limpa o campo de input
   };
 
   return (
     <form className="flex flex-row items-center gap-3">
+      {/* Campo de texto para digitar nova tarefa */}
       <input
         type="text"
         className="border rounded-lg px-2.5 py-1.5 text-lg"
         placeholder="Add a new task"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => setInput(e.target.value)} // Atualiza o estado conforme digita
       />
+      
+      {/* Botão para adicionar tarefa */}
       <button
         onClick={handleAddTask}
         className="bg-violet-400 text-white py-2 px-3.5 rounded-lg font-semibold hover:opacity-70"
@@ -155,21 +173,27 @@ const Input = ({ taskList, setTaskList }) => {
 };
 
 export default Input;
+
 ```
 
 Board.jsx - card de tarefa com botão de remoção
 
 ```jsx
+// Componente responsável por exibir uma tarefa individual e um botão para deletá-la
 const Board = ({ task, index, taskList, setTaskList }) => {
+  // Função que remove a tarefa atual da lista, com base no índice
   const handleDelete = () => {
-    const novaLista = [...taskList];
-    novaLista.splice(index, 1);
-    setTaskList(novaLista);
+    const novaLista = [...taskList]; // Cria uma cópia da lista original
+    novaLista.splice(index, 1); // Remove a tarefa no índice atual
+    setTaskList(novaLista); // Atualiza o estado com a nova lista
   };
 
   return (
     <div className="max-w-md rounded-xl flex flex-col items-center justify-start border text-center text-lg pt-3 pb-4 px-4 md:px-6">
+      {/* Exibe o texto da tarefa */}
       <p>{task}</p>
+      
+      {/* Botão para deletar a tarefa atual */}
       <button
         className="bg-red-500 text-white rounded-lg py-1 px-2 mt-4"
         onClick={handleDelete}
